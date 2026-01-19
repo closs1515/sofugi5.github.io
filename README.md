@@ -81,7 +81,6 @@
                             <option value="相馬">相馬 先生</option>
                             <option value="齋藤">齋藤 先生</option>
                             <option value="川島">川島 先生</option>
-                            <option value="おみずかわ">おみずかわ 先生</option>
                             <option value="阿部千紘">阿部千紘 先生</option>
                             <option value="君塚">君塚 先生</option>
                             <option value="鎌田">鎌田 先生</option>
