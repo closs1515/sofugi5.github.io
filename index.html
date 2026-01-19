@@ -34,6 +34,17 @@
             background-size: 1.5em 1.5em;
             padding-right: 2.5rem;
         }
+
+        /* 数値入力欄の矢印（スピンボタン）を常に表示する設定 */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            opacity: 1 !important;
+            height: 1.5rem;
+        }
+        /* Firefox用 */
+        input[type="number"] {
+            -moz-appearance: number-input;
+        }
     </style>
 </head>
 <body class="bg-gray-100 flex justify-center min-h-screen px-2 py-8">
@@ -120,7 +131,7 @@
                 <div class="bg-white p-6 rounded-xl border-2 border-dashed border-blue-300 text-center">
                     <p class="text-gray-500 text-sm mb-1">プレビュー</p>
                     <p id="preview-text" class="text-2xl font-extrabold text-blue-900">
-                        「佐藤」先生は、今「職員室」にいます
+                        「佐藤幸一」先生は、今「職員室」にいます
                     </p>
                 </div>
 
@@ -272,7 +283,7 @@
                 };
                 
                 const messages = loadMessages();
-                // 同じ先生の古い情報は上書きするようにフィルタリング（オプション）
+                // 同じ先生の古い情報は上書き
                 const filteredMessages = messages.filter(m => m.sender !== who);
                 filteredMessages.push(newMessage);
                 saveMessages(filteredMessages);
@@ -291,7 +302,7 @@
             cancelButton.onclick = () => switchToView('display');
             sendButton.onclick = handleSendClick;
             switchToView('display');
-            setInterval(renderMessages, 10000); // 10秒ごとに更新
+            setInterval(renderMessages, 10000);
         };
     </script>
 </body>
