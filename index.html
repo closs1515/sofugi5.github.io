@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>メッセージボード (localStorage版)</title>
+    <!-- Tailwind CSS CDNをロード -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* デフォルトフォントをInterに設定 */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Flexboxのアイテムが改行された際に揃うように最小幅を設定 */
+        .message-card {
+            min-width: 250px; 
+            max-width: 100%; 
+            flex-grow: 1;
+        }
+        /* ボタンにホバー時のアニメーションを追加 */
+        .main-button {
+            transition: all 0.2s ease-in-out;
+            transform-origin: center;
+        }
+        .main-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.5), 0 4px 6px -2px rgba(59, 130, 246, 0.2);
+        }
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.5rem center;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex justify-center min-h-screen px-2 py-8">
+
+    <div class="w-full bg-white p-6 md:p-12 rounded-3xl shadow-2xl border border-blue-100 transition-all duration-300">
+        
+        <!-- ヘッダー -->
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8 pb-4 border-b-4 border-blue-500 gap-4">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-blue-700 tracking-tight text-center md:text-left">
+                伝言掲示板<span class="text-2xl text-gray-500 font-medium ml-2">(情報電子科)</span>
+            </h1>
+            <button 
+                id="add-button" 
+                class="main-button py-3 px-8 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700 transition duration-200"
+            >
+                + 現在地を登録する
+            </button>
+        </div>
+
+        <!-- 表示用ビュー -->
+        <div id="display-view" class="space-y-6">
+            <div id="messages-list" class="flex flex-wrap gap-8 justify-start">
+                <p id="no-messages-placeholder" class="text-gray-500 text-center p-12 border-4 border-dashed border-blue-200 bg-blue-50 rounded-xl w-full text-lg">
+                    登録された現在地はありません。
+                </p>
+            </div>
+        </div>
+
+        <!-- 入力用ビュー -->
+        <div id="input-view" class="hidden p-8 border-4 border-blue-200 rounded-2xl bg-blue-50 shadow-inner">
+            <h2 class="text-3xl font-bold text-blue-800 mb-8 text-center">現在地の登録</h2>
+            
+            <div class="max-w-2xl mx-auto space-y-8">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- 「誰が」の選択 -->
+                    <div class="space-y-3">
+                        <label for="who-select" class="block text-xl font-bold text-blue-700">
+                            「誰が」
+                        </label>
+                        <select id="who-select" class="w-full p-4 border-2 border-blue-300 rounded-xl shadow-md focus:ring-4 focus:ring-blue-400 focus:border-blue-600 bg-white text-gray-800 text-lg font-bold">
+                            <option value="佐藤幸一">佐藤幸一 先生</option>
+                            <option value="渡邉隼也">渡邉隼也 先生</option>
+                            <option value="相馬">相馬 先生</option>
+                            <option value="齋藤">齋藤 先生</option>
+                            <option value="川島">川島 先生</option>
+                            <option value="おみずかわ">おみずかわ 先生</option>
+                            <option value="阿部千紘">阿部千紘 先生</option>
+                            <option value="君塚">君塚 先生</option>
+                            <option value="鎌田">鎌田 先生</option>
+                        </select>
+                    </div>
+
+                    <!-- 「どこに」の選択 -->
+                    <div class="space-y-3">
+                        <label for="where-select" class="block text-xl font-bold text-blue-700">
+                            「どこに」
+                        </label>
+                        <select id="where-select" class="w-full p-4 border-2 border-blue-300 rounded-xl shadow-md focus:ring-4 focus:ring-blue-400 focus:border-blue-600 bg-white text-gray-800 text-lg font-bold">
+                            <option value="職員室">職員室</option>
+                            <option value="1学年フロア">1学年フロア</option>
+                            <option value="2学年フロア">2学年フロア</option>
+                            <option value="3学年フロア">3学年フロア</option>
+                            <option value="校長室">校長室</option>
+                            <option value="事務室">事務室</option>
+                            <option value="進路指導室">進路指導室</option>
+                            <option value="図書室">図書室</option>
+                            <option value="CGⅠ室">CGⅠ室</option>
+                            <option value="CGⅡ室">CGⅡ室</option>
+                            <option value="グラフィックデザイン室">グラフィックデザイン室</option>
+                            <option value="ネットワーク室">ネットワーク室</option>
+                            <option value="ハードウェア室">ハードウェア室</option>
+                            <option value="生徒会室">生徒会室</option>
+                            <option value="会議室">会議室</option>
+                            <option value="視聴覚室">視聴覚室</option>
+                            <option value="外出中">外出</option>
+                            <option value="出張中">出張</option>
+                            <option value="その他">その他</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- プレビュー表示 -->
+                <div class="bg-white p-6 rounded-xl border-2 border-dashed border-blue-300 text-center">
+                    <p class="text-gray-500 text-sm mb-1">プレビュー</p>
+                    <p id="preview-text" class="text-2xl font-extrabold text-blue-900">
+                        「佐藤」先生は、今「職員室」にいます
+                    </p>
+                </div>
+
+                <!-- 時間設定とアクション -->
+                <div class="flex flex-col md:flex-row gap-6 items-end">
+                    <div class="flex-1 w-full">
+                        <label class="block text-base font-medium text-blue-700 mb-2">
+                            情報の有効期限 (この時間を過ぎると自動消去)
+                        </label>
+                        <div class="flex space-x-3">
+                            <div class="flex-1">
+                                <input type="number" id="expiry-hours" min="0" value="1" class="w-full p-3 border border-blue-300 rounded-lg shadow-sm text-center font-bold">
+                                <span class="block text-xs text-gray-600 mt-1 text-center">時間</span>
+                            </div>
+                            <div class="flex-1">
+                                <input type="number" id="expiry-minutes" min="0" max="59" value="0" class="w-full p-3 border border-blue-300 rounded-lg shadow-sm text-center font-bold">
+                                <span class="block text-xs text-gray-600 mt-1 text-center">分</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3 w-full md:w-auto">
+                        <button id="cancel-button" class="flex-1 py-4 px-6 bg-gray-400 hover:bg-gray-500 text-white font-bold rounded-xl transition duration-200">
+                            キャンセル
+                        </button>
+                        <button id="send-button" class="main-button flex-[2] py-4 px-8 bg-green-500 hover:bg-green-600 text-white font-bold text-xl rounded-xl shadow-lg transition duration-200">
+                            登録する
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="input-message-area" class="mt-6"></div>
+        </div>
+    </div>
+
+    <script>
+        const addButton = document.getElementById('add-button');
+        const sendButton = document.getElementById('send-button');
+        const cancelButton = document.getElementById('cancel-button');
+        const displayView = document.getElementById('display-view');
+        const inputView = document.getElementById('input-view');
+        
+        const whoSelect = document.getElementById('who-select');
+        const whereSelect = document.getElementById('where-select');
+        const previewText = document.getElementById('preview-text');
+        
+        const expiryHoursInput = document.getElementById('expiry-hours');
+        const expiryMinutesInput = document.getElementById('expiry-minutes');
+        const messagesList = document.getElementById('messages-list');
+        const inputMessageArea = document.getElementById('input-message-area');
+
+        const LOCAL_STORAGE_KEY = 'teacher_location_messages';
+
+        // プレビューの更新
+        const updatePreview = () => {
+            const who = whoSelect.value;
+            const where = whereSelect.value;
+            previewText.textContent = `「${who}」先生は、今「${where}」にいます`;
+        };
+
+        whoSelect.addEventListener('change', updatePreview);
+        whereSelect.addEventListener('change', updatePreview);
+
+        const displayMessage = (areaElement, text, type = 'info') => {
+            const colors = {
+                info: 'bg-blue-100 text-blue-800',
+                error: 'bg-red-100 text-red-700',
+                success: 'bg-green-100 text-green-700'
+            };
+            areaElement.innerHTML = `<div class="p-3 ${colors[type]} rounded-lg text-center font-medium shadow-sm">${text}</div>`;
+        };
+
+        const switchToView = (viewId) => {
+            if (viewId === 'display') {
+                displayView.classList.remove('hidden');
+                inputView.classList.add('hidden');
+                addButton.classList.remove('hidden');
+                renderMessages();
+            } else {
+                displayView.classList.add('hidden');
+                inputView.classList.remove('hidden');
+                addButton.classList.add('hidden');
+                inputMessageArea.innerHTML = '';
+                updatePreview();
+            }
+        };
+
+        const loadMessages = () => {
+            const json = localStorage.getItem(LOCAL_STORAGE_KEY);
+            return json ? JSON.parse(json) : [];
+        };
+
+        const saveMessages = (messages) => {
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(messages));
+        };
+
+        const cleanAndGetValidMessages = () => {
+            const allMessages = loadMessages();
+            const now = Date.now();
+            const validMessages = allMessages.filter(msg => msg.expiry_timestamp === null || msg.expiry_timestamp > now);
+            if (allMessages.length !== validMessages.length) saveMessages(validMessages);
+            return validMessages.sort((a, b) => b.created_at - a.created_at);
+        };
+
+        const renderMessageCard = (message) => {
+            const createdTime = new Date(message.created_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+            return `
+                <div class="message-card p-6 bg-white border border-gray-200 rounded-xl shadow-xl border-l-8 border-blue-500"> 
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">更新: ${createdTime}</span>
+                        <span class="text-xs text-gray-400">ID: ${message.id.slice(0,4)}</span>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-100">
+                        <p class="text-2xl font-black text-gray-800 leading-relaxed">${message.message}</p>
+                    </div>
+                </div>
+            `;
+        };
+
+        const renderMessages = () => {
+            const validMessages = cleanAndGetValidMessages();
+            messagesList.innerHTML = '';
+            if (validMessages.length === 0) {
+                messagesList.innerHTML = `<p class="text-gray-500 text-center p-12 border-4 border-dashed border-blue-200 bg-blue-50 rounded-xl w-full text-lg">登録された現在地はありません。</p>`;
+            } else {
+                validMessages.forEach(msg => messagesList.innerHTML += renderMessageCard(msg));
+            }
+        };
+
+        const handleSendClick = () => {
+            const who = whoSelect.value;
+            const where = whereSelect.value;
+            const fullMessage = `「${who}」先生は、今「${where}」にいます`;
+
+            sendButton.disabled = true;
+            try {
+                const hours = parseInt(expiryHoursInput.value, 10) || 0;
+                const minutes = parseInt(expiryMinutesInput.value, 10) || 0;
+                const expiryTimeMs = (hours * 60 * 60 * 1000) + (minutes * 60 * 1000);
+                const expiryTimestamp = expiryTimeMs > 0 ? Date.now() + expiryTimeMs : null;
+
+                const newMessage = {
+                    id: Date.now() + Math.random().toString(36).substring(2, 5),
+                    sender: who,
+                    message: fullMessage,
+                    expiry_timestamp: expiryTimestamp, 
+                    created_at: Date.now(),
+                };
+                
+                const messages = loadMessages();
+                // 同じ先生の古い情報は上書きするようにフィルタリング（オプション）
+                const filteredMessages = messages.filter(m => m.sender !== who);
+                filteredMessages.push(newMessage);
+                saveMessages(filteredMessages);
+
+                displayMessage(inputMessageArea, "現在地を更新しました。", 'success');
+                setTimeout(() => switchToView('display'), 800);
+            } catch (error) {
+                displayMessage(inputMessageArea, "エラーが発生しました。", 'error');
+            } finally {
+                sendButton.disabled = false;
+            }
+        };
+
+        window.onload = () => {
+            addButton.onclick = () => switchToView('input');
+            cancelButton.onclick = () => switchToView('display');
+            sendButton.onclick = handleSendClick;
+            switchToView('display');
+            setInterval(renderMessages, 10000); // 10秒ごとに更新
+        };
+    </script>
+</body>
+</html>
