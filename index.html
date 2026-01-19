@@ -3,62 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>メッセージボード (localStorage版)</title>
+    <title>メッセージボード (情報電子科)</title>
     <!-- Tailwind CSS CDNをロード -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* デフォルトフォントをInterに設定 */
+        /* デフォルトフォントの設定 */
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
         }
-        /* Flexboxのアイテムが改行された際に揃うように最小幅を設定 */
+        
+        /* PC版：Flexboxのアイテムが改行された際に揃うように最小幅を設定 */
         .message-card {
             min-width: 250px; 
             max-width: 100%; 
             flex-grow: 1;
-        }
-        /* ボタンにホバー時のアニメーションを追加 */
-        .main-button {
             transition: all 0.2s ease-in-out;
-            transform-origin: center;
         }
-        .main-button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.5), 0 4px 6px -2px rgba(59, 130, 246, 0.2);
+
+        /* PC版：ボタンにホバー時のアニメーションを追加 */
+        @media (min-width: 768px) {
+            .main-button {
+                transition: all 0.2s ease-in-out;
+                transform-origin: center;
+            }
+            .main-button:hover {
+                transform: scale(1.05);
+                box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.5), 0 4px 6px -2px rgba(59, 130, 246, 0.2);
+            }
         }
+
+        /* スマホ版：タップ時のフィードバック */
+        @media (max-width: 767px) {
+            .main-button:active {
+                transform: scale(0.95);
+            }
+        }
+
         select {
             appearance: none;
             background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
             background-repeat: no-repeat;
-            background-position: right 0.5rem center;
+            background-position: right 0.75rem center;
             background-size: 1.5em 1.5em;
             padding-right: 2.5rem;
         }
-
-        /* 数値入力欄の矢印（スピンボタン）を常に表示する設定 */
-        input[type="number"]::-webkit-inner-spin-button,
-        input[type="number"]::-webkit-outer-spin-button {
-            opacity: 1 !important;
-            height: 1.5rem;
-        }
-        /* Firefox用 */
-        input[type="number"] {
-            -moz-appearance: number-input;
-        }
     </style>
 </head>
-<body class="bg-gray-100 flex justify-center min-h-screen px-2 py-8">
+<body class="bg-gray-100 flex justify-center min-h-screen px-2 py-4 md:py-8">
 
-    <div class="w-full bg-white p-6 md:p-12 rounded-3xl shadow-2xl border border-blue-100 transition-all duration-300">
+    <div class="w-full max-w-6xl bg-white p-4 md:p-12 rounded-2xl md:rounded-3xl shadow-2xl border border-blue-100 transition-all duration-300">
         
         <!-- ヘッダー -->
-        <div class="flex flex-col md:flex-row justify-between items-center mb-8 pb-4 border-b-4 border-blue-500 gap-4">
-            <h1 class="text-4xl md:text-5xl font-extrabold text-blue-700 tracking-tight text-center md:text-left">
-                伝言掲示板<span class="text-2xl text-gray-500 font-medium ml-2">(情報電子科)</span>
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6 md:mb-8 pb-4 border-b-4 border-blue-500 gap-4">
+            <h1 class="text-3xl md:text-5xl font-extrabold text-blue-700 tracking-tight text-center md:text-left">
+                伝言掲示板<span class="text-xl md:text-2xl text-gray-500 font-medium ml-2">(情報電子科)</span>
             </h1>
             <button 
                 id="add-button" 
-                class="main-button py-3 px-8 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700 transition duration-200"
+                class="main-button w-full md:w-auto py-3 px-8 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700 transition duration-200"
             >
                 + 現在地を登録する
             </button>
@@ -66,7 +68,7 @@
 
         <!-- 表示用ビュー -->
         <div id="display-view" class="space-y-6">
-            <div id="messages-list" class="flex flex-wrap gap-8 justify-start">
+            <div id="messages-list" class="flex flex-wrap gap-4 md:gap-8 justify-start">
                 <p id="no-messages-placeholder" class="text-gray-500 text-center p-12 border-4 border-dashed border-blue-200 bg-blue-50 rounded-xl w-full text-lg">
                     登録された現在地はありません。
                 </p>
@@ -74,15 +76,15 @@
         </div>
 
         <!-- 入力用ビュー -->
-        <div id="input-view" class="hidden p-8 border-4 border-blue-200 rounded-2xl bg-blue-50 shadow-inner">
-            <h2 class="text-3xl font-bold text-blue-800 mb-8 text-center">現在地の登録</h2>
+        <div id="input-view" class="hidden p-4 md:p-8 border-4 border-blue-200 rounded-2xl bg-blue-50 shadow-inner">
+            <h2 class="text-2xl md:text-3xl font-bold text-blue-800 mb-6 md:mb-8 text-center">現在地の登録</h2>
             
-            <div class="max-w-2xl mx-auto space-y-8">
+            <div class="max-w-2xl mx-auto space-y-6 md:space-y-8">
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
                     <!-- 「誰が」の選択 -->
-                    <div class="space-y-3">
-                        <label for="who-select" class="block text-xl font-bold text-blue-700">
+                    <div class="space-y-2 md:space-y-3">
+                        <label for="who-select" class="block text-lg md:text-xl font-bold text-blue-700">
                             「誰が」
                         </label>
                         <select id="who-select" class="w-full p-4 border-2 border-blue-300 rounded-xl shadow-md focus:ring-4 focus:ring-blue-400 focus:border-blue-600 bg-white text-gray-800 text-lg font-bold">
@@ -99,8 +101,8 @@
                     </div>
 
                     <!-- 「どこに」の選択 -->
-                    <div class="space-y-3">
-                        <label for="where-select" class="block text-xl font-bold text-blue-700">
+                    <div class="space-y-2 md:space-y-3">
+                        <label for="where-select" class="block text-lg md:text-xl font-bold text-blue-700">
                             「どこに」
                         </label>
                         <select id="where-select" class="w-full p-4 border-2 border-blue-300 rounded-xl shadow-md focus:ring-4 focus:ring-blue-400 focus:border-blue-600 bg-white text-gray-800 text-lg font-bold">
@@ -120,47 +122,60 @@
                             <option value="生徒会室">生徒会室</option>
                             <option value="会議室">会議室</option>
                             <option value="視聴覚室">視聴覚室</option>
-                            <option value="外出中">外出</option>
-                            <option value="出張中">出張</option>
+                            <option value="外出中">外出中</option>
+                            <option value="出張中">出張中</option>
                             <option value="その他">その他</option>
                         </select>
                     </div>
                 </div>
 
                 <!-- プレビュー表示 -->
-                <div class="bg-white p-6 rounded-xl border-2 border-dashed border-blue-300 text-center">
-                    <p class="text-gray-500 text-sm mb-1">プレビュー</p>
-                    <p id="preview-text" class="text-2xl font-extrabold text-blue-900">
+                <div class="bg-white p-4 md:p-6 rounded-xl border-2 border-dashed border-blue-300 text-center">
+                    <p class="text-gray-500 text-xs md:text-sm mb-1">表示プレビュー</p>
+                    <p id="preview-text" class="text-xl md:text-2xl font-extrabold text-blue-900">
                         「佐藤幸一」先生は、今「職員室」にいます
                     </p>
                 </div>
 
                 <!-- 時間設定とアクション -->
-                <div class="flex flex-col md:flex-row gap-6 items-end">
-                    <div class="flex-1 w-full">
-                        <label class="block text-base font-medium text-blue-700 mb-2">
-                            情報の有効期限 (この時間を過ぎると自動消去)
-                        </label>
-                        <div class="flex space-x-3">
-                            <div class="flex-1">
-                                <input type="number" id="expiry-hours" min="0" value="1" class="w-full p-3 border border-blue-300 rounded-lg shadow-sm text-center font-bold">
-                                <span class="block text-xs text-gray-600 mt-1 text-center">時間</span>
+                <div class="space-y-4">
+                    <label class="block text-lg md:text-xl font-bold text-blue-700">
+                        表示する時間
+                    </label>
+                    <div class="flex flex-col md:flex-row gap-4 md:gap-6 items-stretch md:items-end">
+                        <div class="flex-1 grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="expiry-hour" class="block text-xs text-gray-500 mb-1">時間</label>
+                                <select id="expiry-hour" class="w-full p-4 border-2 border-blue-300 rounded-xl shadow-md bg-white text-gray-800 text-lg font-bold">
+                                    <option value="0">0時間</option>
+                                    <option value="1" selected>1時間</option>
+                                    <option value="2">2時間</option>
+                                    <option value="3">3時間</option>
+                                    <option value="4">4時間</option>
+                                    <option value="8">8時間</option>
+                                </select>
                             </div>
-                            <div class="flex-1">
-                                <input type="number" id="expiry-minutes" min="0" max="59" value="0" class="w-full p-3 border border-blue-300 rounded-lg shadow-sm text-center font-bold">
-                                <span class="block text-xs text-gray-600 mt-1 text-center">分</span>
+                            <div>
+                                <label for="expiry-min" class="block text-xs text-gray-500 mb-1">分</label>
+                                <select id="expiry-min" class="w-full p-4 border-2 border-blue-300 rounded-xl shadow-md bg-white text-gray-800 text-lg font-bold">
+                                    <option value="0" selected>0分</option>
+                                    <option value="15">15分</option>
+                                    <option value="30">30分</option>
+                                    <option value="45">45分</option>
+                                </select>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="flex gap-3 w-full md:w-auto">
-                        <button id="cancel-button" class="flex-1 py-4 px-6 bg-gray-400 hover:bg-gray-500 text-white font-bold rounded-xl transition duration-200">
-                            キャンセル
-                        </button>
-                        <button id="send-button" class="main-button flex-[2] py-4 px-8 bg-green-500 hover:bg-green-600 text-white font-bold text-xl rounded-xl shadow-lg transition duration-200">
-                            登録する
-                        </button>
+                        <div class="flex gap-3 mt-2 md:mt-0">
+                            <button id="cancel-button" class="flex-1 py-4 px-6 bg-gray-400 hover:bg-gray-500 text-white font-bold rounded-xl transition duration-200">
+                                キャンセル
+                            </button>
+                            <button id="send-button" class="main-button flex-[2] py-4 px-8 bg-green-500 hover:bg-green-600 text-white font-bold text-xl rounded-xl shadow-lg transition duration-200">
+                                登録する
+                            </button>
+                        </div>
                     </div>
+                    <p class="text-xs text-gray-400 text-center md:text-left">※時間が経過すると自動的に消去されます</p>
                 </div>
             </div>
             
@@ -179,14 +194,13 @@
         const whereSelect = document.getElementById('where-select');
         const previewText = document.getElementById('preview-text');
         
-        const expiryHoursInput = document.getElementById('expiry-hours');
-        const expiryMinutesInput = document.getElementById('expiry-minutes');
+        const expiryHour = document.getElementById('expiry-hour');
+        const expiryMin = document.getElementById('expiry-min');
         const messagesList = document.getElementById('messages-list');
         const inputMessageArea = document.getElementById('input-message-area');
 
-        const LOCAL_STORAGE_KEY = 'teacher_location_messages';
+        const LOCAL_STORAGE_KEY = 'teacher_location_v2';
 
-        // プレビューの更新
         const updatePreview = () => {
             const who = whoSelect.value;
             const where = whereSelect.value;
@@ -220,88 +234,81 @@
             }
         };
 
-        const loadMessages = () => {
-            const json = localStorage.getItem(LOCAL_STORAGE_KEY);
-            return json ? JSON.parse(json) : [];
-        };
+        const loadMessages = () => JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '[]');
+        const saveMessages = (messages) => localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(messages));
 
-        const saveMessages = (messages) => {
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(messages));
+        const deleteMessage = (id) => {
+            const messages = loadMessages();
+            const filtered = messages.filter(m => m.id !== id);
+            saveMessages(filtered);
+            renderMessages();
         };
-
-        const cleanAndGetValidMessages = () => {
-            const allMessages = loadMessages();
-            const now = Date.now();
-            const validMessages = allMessages.filter(msg => msg.expiry_timestamp === null || msg.expiry_timestamp > now);
-            if (allMessages.length !== validMessages.length) saveMessages(validMessages);
-            return validMessages.sort((a, b) => b.created_at - a.created_at);
-        };
-
-        const renderMessageCard = (message) => {
-            const createdTime = new Date(message.created_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
-            return `
-                <div class="message-card p-6 bg-white border border-gray-200 rounded-xl shadow-xl border-l-8 border-blue-500"> 
-                    <div class="flex justify-between items-start mb-4">
-                        <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">更新: ${createdTime}</span>
-                        <span class="text-xs text-gray-400">ID: ${message.id.slice(0,4)}</span>
-                    </div>
-                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-100">
-                        <p class="text-2xl font-black text-gray-800 leading-relaxed">${message.message}</p>
-                    </div>
-                </div>
-            `;
-        };
+        window.deleteMessage = deleteMessage;
 
         const renderMessages = () => {
-            const validMessages = cleanAndGetValidMessages();
+            const allMessages = loadMessages();
+            const now = Date.now();
+            const validMessages = allMessages.filter(msg => msg.expiry === null || msg.expiry > now);
+            
+            if (allMessages.length !== validMessages.length) saveMessages(validMessages);
+            
             messagesList.innerHTML = '';
             if (validMessages.length === 0) {
                 messagesList.innerHTML = `<p class="text-gray-500 text-center p-12 border-4 border-dashed border-blue-200 bg-blue-50 rounded-xl w-full text-lg">登録された現在地はありません。</p>`;
-            } else {
-                validMessages.forEach(msg => messagesList.innerHTML += renderMessageCard(msg));
+                return;
             }
+
+            validMessages.sort((a, b) => b.created_at - a.created_at).forEach(message => {
+                const createdTime = new Date(message.created_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+                const durationText = message.duration ? ` (${message.duration})` : "";
+
+                const card = document.createElement('div');
+                card.className = "message-card p-6 bg-white border border-gray-200 rounded-xl shadow-xl border-l-8 border-blue-500 flex flex-col justify-between";
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="flex flex-col gap-1">
+                                <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold w-fit">更新: ${createdTime}</span>
+                                <span class="text-[10px] text-gray-400 font-medium ml-1">${durationText}</span>
+                            </div>
+                            <button onclick="deleteMessage('${message.id}')" class="text-xs text-red-500 hover:text-red-700 font-bold border border-red-200 px-2 py-1 rounded bg-red-50">削除</button>
+                        </div>
+                        <div class="p-4 bg-gray-50 rounded-lg border border-gray-100">
+                            <p class="text-2xl font-black text-gray-800 leading-relaxed">${message.text}</p>
+                        </div>
+                    </div>
+                `;
+                messagesList.appendChild(card);
+            });
         };
 
-        const handleSendClick = () => {
-            const who = whoSelect.value;
-            const where = whereSelect.value;
-            const fullMessage = `「${who}」先生は、今「${where}」にいます`;
+        sendButton.onclick = () => {
+            const h = parseInt(expiryHour.value);
+            const m = parseInt(expiryMin.value);
+            const ttl = (h * 60 + m) * 60 * 1000;
+            
+            const newMessage = {
+                id: Date.now() + Math.random().toString(36).substr(2, 5),
+                sender: whoSelect.value,
+                text: previewText.textContent,
+                created_at: Date.now(),
+                expiry: ttl > 0 ? Date.now() + ttl : null,
+                duration: ttl > 0 ? `${h}時間${m}分` : null
+            };
 
-            sendButton.disabled = true;
-            try {
-                const hours = parseInt(expiryHoursInput.value, 10) || 0;
-                const minutes = parseInt(expiryMinutesInput.value, 10) || 0;
-                const expiryTimeMs = (hours * 60 * 60 * 1000) + (minutes * 60 * 1000);
-                const expiryTimestamp = expiryTimeMs > 0 ? Date.now() + expiryTimeMs : null;
+            const messages = loadMessages().filter(m => m.sender !== whoSelect.value);
+            messages.push(newMessage);
+            saveMessages(messages);
 
-                const newMessage = {
-                    id: Date.now() + Math.random().toString(36).substring(2, 5),
-                    sender: who,
-                    message: fullMessage,
-                    expiry_timestamp: expiryTimestamp, 
-                    created_at: Date.now(),
-                };
-                
-                const messages = loadMessages();
-                // 同じ先生の古い情報は上書き
-                const filteredMessages = messages.filter(m => m.sender !== who);
-                filteredMessages.push(newMessage);
-                saveMessages(filteredMessages);
-
-                displayMessage(inputMessageArea, "現在地を更新しました。", 'success');
-                setTimeout(() => switchToView('display'), 800);
-            } catch (error) {
-                displayMessage(inputMessageArea, "エラーが発生しました。", 'error');
-            } finally {
-                sendButton.disabled = false;
-            }
+            displayMessage(inputMessageArea, "現在地を更新しました。", 'success');
+            setTimeout(() => switchToView('display'), 800);
         };
+
+        addButton.onclick = () => switchToView('input');
+        cancelButton.onclick = () => switchToView('display');
 
         window.onload = () => {
-            addButton.onclick = () => switchToView('input');
-            cancelButton.onclick = () => switchToView('display');
-            sendButton.onclick = handleSendClick;
-            switchToView('display');
+            renderMessages();
             setInterval(renderMessages, 10000);
         };
     </script>
